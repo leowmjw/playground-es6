@@ -8,35 +8,28 @@ module.exports = () => {
     req.get("http://localhost:8080/api")
         .end((err, res) => {
 
+            // util.inspect(res.txt, { colors: true })
             if (err || !res.ok) {
-                console.log('Oh no! error' + res.status);
+                console.log('Oh no! error MSG: ' + err.message);
                 console.log(util.inspect(res, { colors: true }))
             } else {
                 // Alternative
-                // console.log(JSON.stringify(res.body))
+                console.log("STRINGIFY: " + JSON.stringify(res.body))
                 /*
                 util.inspect(
                     JSON.parse(res.text),
                     {
                         colors: true
                     })
-                  */  
-                // Iterate through the keyparis?
-                /* DEBUG
-                let shapefiles = JSON.parse(res.text)
-                let myshape = Object.create(shapefiles)
-                myshape.keys
+                  */
+                // let items = JSON.parse(res.body);
+                console.log("BODY-ITEMS: " + util.inspect(res.body, { colors: true }))
+                let myjson = JSON.parse(res.text)
+                // console.log("All OK" + util.inspect(myjson, { colors: true }) )
                 
-                console.log(
-                    util.inspect(
-                        shapefiles,
-                        { colors: true }
-                        )
-                    )
-                    
-                    */
-                // let ab = {par: [0,0]}
-                    
+                for (let k of Object.keys(myjson)) {
+                    console.log("Item key " + k + " is " + myjson[k])
+                }
             }
         })
 }
