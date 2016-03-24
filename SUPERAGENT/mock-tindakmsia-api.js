@@ -1,4 +1,4 @@
-'use strict'
+"use strict";
 
 var req = require('superagent')
 var util = require('util')
