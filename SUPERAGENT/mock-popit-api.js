@@ -4,7 +4,10 @@ var req = require('superagent')
 var util = require('util')
 let money = "Outside MONEY!!!"
 let ASQ = require("asynquence")
-var myGen = null
+let myGen = null
+let myData = {
+    msg: null
+}
 
 module.exports = {
     money: "Inside MONEY!!",
@@ -62,6 +65,7 @@ module.exports = {
                     }
                     // Done, move to next in iterator!!
                     myGen.next("OPEN311")
+                    myData.msg = "OPEN311"
                 }
 
             })
@@ -105,7 +109,8 @@ module.exports = {
                     // Server-side needs to have HEADER of application/json!!
                     // console.log("PAR is " + res.body.par)
                     myGen.next("MAPIT")
-
+                    console.log("PREV is " + myData.msg)
+                    myData.msg = "MAPIT"
                 }
 
             })
@@ -113,9 +118,6 @@ module.exports = {
     },
     bob() {
         console.log("BOB!!!")
-        let myData = {
-            msg: null
-        }
         // this.executeAPICall()
         myGen = this.generatorAPI(myData)
         // Kick it off ...
