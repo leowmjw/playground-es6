@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Try suite of tools under superagent",
   "main": "index.js",
-  "dependencies": {},
+  "dependencies": {
+    "arangojs": "^4.3.0"
+  },
   "devDependencies": {
     "asynquence": "^0.9.0",
     "stream": "0.0.2",
