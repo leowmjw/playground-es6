@@ -1,0 +1,19 @@
+{
+  "name": "es6-test-tap",
+  "version": "1.0.0",
+  "description": "Test tap",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node_modules/.bin/tap test/**/*.test.js || true",
+    "cover": "node_modules/.bin/tap test/**/*.test.js --cov --coverage-report=lcov"
+  },
+  "author": "Michael Leow <leow@sinarproject.org>",
+  "license": "AGPL-3.0",
+  "devDependencies": {
+    "tap": "^8.0.1",
+    "tap-only": "^0.0.5"
+  }
+}
