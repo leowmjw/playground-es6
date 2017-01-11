@@ -18,19 +18,23 @@ const initID = function (current_month, current_day) {
     // Assumes a month has 30 days, and there is 80 problems per day; feel free to adjust
     const DAILY_ESTIMATE = 80
     const DAYS_IN_MONTH = 30
+    // Squeeze it into integers
+    current_month = parseInt(current_month)
+    current_day = parseInt(current_day)
     // DEBUG:
-    // console.error("MONTH: " + current_month + " DAY:" + current_day)
+    // console.error("\n\nMONTH: " + current_month + " DAY:" + current_day)
     // JOI Validation?
-    if (current_month == undefined || current_day == undefined) {
+    if (
+        current_month == undefined || current_day == undefined
+        || Number.isNaN(current_month) || Number.isNaN(current_day)
+        || current_month < 1 || current_day < 1
+    ) {
         return {
             "error": "Undefined input!"
         }
     }
-    // If somehow there is problem
+    // If somehow there is problem; it is caught earlier on
     let starting_lower_bound_multiplier = current_month - 1
-    if (starting_lower_bound_multiplier < 0) {
-        starting_lower_bound_multiplier = 0
-    }
     // DEBUG:
     // console.error("LOWER_BOUND: " + starting_lower_bound_multiplier)
     const low_mark = DAILY_ESTIMATE * starting_lower_bound_multiplier * DAYS_IN_MONTH

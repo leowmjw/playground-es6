@@ -28,28 +28,10 @@ mytest.test("Find the newest running number", {buffered: true}, function (t) {
     const latest_aduan = require("../../libs/latest-aduan")
     let context = Object.create(latest_aduan.context)
 
-    /*
-     t.beforeEach(function (done) {
-     context.prefix = "17-"
-     console.error(`\n\nBEFORE_PREFIX: ${context.prefix}`)
-     // done()
-     })
-     */
-
     context.prefix = "17-"
-    // DEBUG:
-    // console.error(`\n\nBEFORE_PREFIX: ${context.prefix}`)
 
     // Input   { current_month, current_day, high_mark, low_mark }
-    // Output
-    // Expected message
-    // Expected status?
-
-    t.same(
-        latest_aduan.nextID(context.prefix, context.high_mark, context.low_mark),
-        "TODO",
-        "Initialize ID when starting",
-        {"todo": false})
+    // Output  { error, high_mark, low_mark }
 
     const test_cases_scenario_init = [
         {
@@ -71,6 +53,16 @@ mytest.test("Find the newest running number", {buffered: true}, function (t) {
             "scenario": "Next binary search number to try from scratch (Apr)",
             "input": {"current_month": 4, "current_day": 13, "high_mark": null, "low_mark": null},
             "output": {"error": null, "high_mark": 8240, "low_mark": 7200}
+        },
+        {
+            "scenario": "Next binary search number when undefined month",
+            "input": {"current_month": undefined, "current_day": 1, "high_mark": null, "low_mark": null},
+            "output": {"error": "Undefined input!"}
+        },
+        {
+            "scenario": "Next binary search number to try from scratch (Feb)",
+            "input": {"current_month": "abc", "current_day": 10, "high_mark": null, "low_mark": null},
+            "output": {"error": "Undefined input!"}
         }
     ]
 
