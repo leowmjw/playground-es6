@@ -45,13 +45,69 @@ const initID = function (current_month, current_day) {
     }
 }
 
-const nextID = function (prefix, high_mark, low_mark) {
-    function binary_search() {
+const nextID = function (current_high_mark, high_mark_page_exists, current_low_mark, low_mark_page_exists) {
+    const MAX_HIGH_MARK = 100000
+    const MIN_LOW_MARK = 0
+    // DEBUG:
+    // console.error(`HM: ${current_high_mark} Exists?: ${high_mark_page_exists} \nLM: ${current_low_mark} Exists?: ${low_mark_page_exists}\n\n`)
+    let non_fatal_error = null
+    let high_mark = 0
+    let low_mark = 0
 
+    // Squeeze it into integers
+    current_high_mark = parseInt(current_high_mark)
+    current_low_mark = parseInt(current_low_mark)
+
+    // DEBUG:
+    // console.error("\n\nMONTH: " + current_month + " DAY:" + current_day)
+    // JOI Validation?
+    if (
+        current_high_mark == undefined || current_low_mark == undefined
+        || Number.isNaN(current_high_mark) || Number.isNaN(current_low_mark)
+        || current_high_mark < 1 || current_low_mark < 1 || current_high_mark < current_low_mark
+        || typeof high_mark_page_exists != 'boolean' || typeof low_mark_page_exists != 'boolean'
+    ) {
+        return {
+            "error": "Undefined input!"
+        }
     }
-
-    // console.error(`\n\nPREFIX: ${prefix}`)
-    return "TODO"
+    // Firstly; evaluate the existence of low_mark
+    if (low_mark_page_exists === true) {
+        if (high_mark_page_exists === true) {
+            // Both too pessimistic
+            low_mark = current_high_mark
+            high_mark = (MAX_HIGH_MARK - current_high_mark) / 2 + current_high_mark
+            // Special case where it is high indication the page is already found
+            /*
+            if (high_mark > (current_high_mark - current_low_mark)){
+                non_fatal_error = "Should not !"
+                low_mark = current_low_mark
+                high_mark = current_high_mark
+            }
+            */
+        } else {
+            // High overshot; get closer to the low_mark
+            low_mark = current_low_mark
+            high_mark = (current_high_mark - current_low_mark) / 2 + current_low_mark
+        }
+    } else {
+        // If low_mark does not exist; the only logical choice is if the high_mark pag itself NOT exists!
+        if (high_mark_page_exists === false) {
+            // Both are too Optimistic; reset down
+            low_mark = current_low_mark - (current_low_mark - MIN_LOW_MARK) / 2
+            high_mark = current_low_mark
+        } else {
+            // In the case where there is some strange inconsistencies; note but can allow retrying!
+            non_fatal_error = "Inconsistent state - retry!"
+            low_mark = current_low_mark
+            high_mark = current_high_mark
+        }
+    }
+    return {
+        "error": non_fatal_error,
+        "high_mark": high_mark,
+        "low_mark": low_mark
+    }
 }
 
 const testID = function () {
