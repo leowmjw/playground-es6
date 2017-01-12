@@ -39,7 +39,7 @@ mytest.test("Find the newest running number", {buffered: true}, function (t) {
         {
             "scenario": "Next binary search number to try from scratch (Jan)",
             "input": {"current_month": 1, "current_day": 5, "high_mark": null, "low_mark": null},
-            "output": {"error": null, "high_mark": 400, "low_mark": 0}
+            "output": {"error": null, "high_mark": 400, "low_mark": 1}
         },
         {
             "scenario": "Next binary search number to try from scratch (Feb)",
@@ -101,18 +101,18 @@ mytest.test("Find the newest running number", {buffered: true}, function (t) {
             "output": {"error": null, "high_mark": 57500, "low_mark": 15000}
         },
         /*
-         * This will brak things; but needs to be solved at the higher level
-        {
-            "scenario": "Found the page (id = 2)!",
-            "input": {
-                "current_high_mark": 2,
-                "high_mark_page_exists": true,
-                "current_low_mark": 1,
-                "low_mark_page_exists": true
-            },
-            "output": {"error": null, "high_mark": 2, "low_mark": 2}
-        },
-        */
+         * This will break things; but needs to be solved at the higher level
+         {
+         "scenario": "Found the page (id = 2)!",
+         "input": {
+         "current_high_mark": 2,
+         "high_mark_page_exists": true,
+         "current_low_mark": 1,
+         "low_mark_page_exists": true
+         },
+         "output": {"error": null, "high_mark": 2, "low_mark": 2}
+         },
+         */
         {
             "scenario": "High Mark overshot but Low Mark is OK (id = 50000)",
             "input": {
@@ -162,6 +162,194 @@ mytest.test("Find the newest running number", {buffered: true}, function (t) {
             latest_aduan.nextID(
                 single_test_case.input.current_high_mark, single_test_case.input.high_mark_page_exists,
                 single_test_case.input.current_low_mark, single_test_case.input.low_mark_page_exists
+            ),
+            single_test_case.output,
+            single_test_case.scenario
+        )
+    })
+
+    const test_cases_scenario_update_equilibrium_state = [
+        {
+            "scenario": "Initial setup state",
+            "input": {
+                "current_high_mark": 60000,
+                "current_low_mark": 40000,
+                "repo_aduan_public": {
+                    "getPage": function (id) {
+                        let value = null
+                        switch (id) {
+                            case 60001:
+                                value = false
+                                break
+                            case 60000:
+                                value = false
+                                break
+                            case 40000:
+                                value = true
+                                break
+                        }
+                        return {
+                            "error": null,
+                            "value": value
+                        }
+                    }
+                },
+                "current_max_high_mark": 100000,
+            },
+            "output": {
+                "error": null, "found_id": null,
+                "high_mark": 50000, "low_mark": 40000,
+                "max_high_mark": 60000
+            }
+        },
+        {
+            "scenario": "In between search states (too Optimistic)",
+            "input": {
+                "current_high_mark": 300,
+                "current_low_mark": 80,
+                "repo_aduan_public": {
+                    "getPage": function (id) {
+                        // All FALSE; too optimistic
+                        return {
+                            "error": null,
+                            "value": false
+                        }
+                    }
+                },
+                "current_max_high_mark": 500,
+            },
+            "output": {
+                "error": null, "found_id": null,
+                "high_mark": 80, "low_mark": 40,
+                "max_high_mark": 300
+            }
+        },
+        {
+            "scenario": "In between search states (too Pessimistic)",
+            "input": {
+                "current_high_mark": 15000,
+                "current_low_mark": 3000,
+                "repo_aduan_public": {
+                    "getPage": function (id) {
+                        // All TRUE; too pessimistic
+                        return {
+                            "error": null,
+                            "value": true
+                        }
+                    }
+                },
+                "current_max_high_mark": 25000,
+            },
+            "output": {
+                "error": null, "found_id": null,
+                "high_mark": 20000, "low_mark": 15000,
+                "max_high_mark": 25000
+            }
+        },
+        {
+            "scenario": "Found the page",
+            "input": {
+                "current_high_mark": 50000,
+                "current_low_mark": 40000,
+                "repo_aduan_public": {
+                    "getPage": function (id) {
+                        let value = null
+                        switch (id) {
+                            case 50001:
+                                value = false
+                                break
+                            case 50000:
+                                value = true
+                                break
+                            case 40000:
+                                value = true
+                                break
+                        }
+                        return {
+                            "error": null,
+                            "value": value
+                        }
+                    }
+                },
+                "current_max_high_mark": 60000,
+            },
+            "output": {
+                "error": null,
+                "found_id": 50001,
+                "max_high_mark": 60000
+            }
+        },
+        {
+            "scenario": "Non-Fatal Inconsistent scenario happens (Server Overloaded!)",
+            "input": {
+                "current_high_mark": 60000,
+                "current_low_mark": 40000,
+                "repo_aduan_public": {
+                    "getPage": function (id) {
+                        let value = null
+                        switch (id) {
+                            case 60001:
+                                value = true
+                                break
+                            case 60000:
+                                value = true
+                                break
+                            case 40000:
+                                value = false
+                                break
+                        }
+                        return {
+                            "error": null,
+                            "value": value
+                        }
+                    }
+                },
+                "current_max_high_mark": 80000,
+            },
+            "output": {
+                "error": null, "found_id": null,
+                "high_mark": 60000, "low_mark": 40000,
+                "max_high_mark": 80000
+            }
+        },
+        {
+            "scenario": "Fatal error scenario happens (Network partition!)",
+            "input": {
+                "current_high_mark": 60000,
+                "current_low_mark": 40000,
+                "repo_aduan_public": {
+                    "getPage": function (id) {
+                        let value = null
+                        let error = null
+                        switch (id) {
+                            case 60001:
+                                value = false
+                                break
+                            case 60000:
+                                error = "Server Error - 503"
+                                value = 503
+                                break
+                            case 40000:
+                                value = true
+                                break
+                        }
+                        return {
+                            "error": error,
+                            "value": value
+                        }
+                    }
+                },
+                "current_max_high_mark": 80000,
+            },
+            "output": {"error": "FATAL!!"}
+        },
+    ]
+
+    test_cases_scenario_update_equilibrium_state.map(function (single_test_case) {
+        t.strictSame(
+            latest_aduan.testID(
+                single_test_case.input.current_high_mark, single_test_case.input.current_low_mark,
+                single_test_case.input.repo_aduan_public, single_test_case.input.current_max_high_mark
             ),
             single_test_case.output,
             single_test_case.scenario
