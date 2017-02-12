@@ -389,8 +389,3 @@ mytest.test("Find the newest running number", {buffered: true}, function (t) {
     t.end()
 })
 
-mytest.test("Extract status from single page", {buffered: true}, function (t) {
-    t.fail("********************************** TODO!!!")
-
-    t.end()
-})
