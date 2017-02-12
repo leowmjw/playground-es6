@@ -19,6 +19,8 @@
     "tap-only": "^0.0.5"
   },
   "dependencies": {
+    "cheerio": "^0.22.0",
+    "cheerio-tableparser": "^1.0.1",
     "es6-promisify": "^5.0.0"
   }
 }

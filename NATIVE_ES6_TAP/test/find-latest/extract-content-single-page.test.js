@@ -5,6 +5,8 @@
 const util = require("util")
 const mytest = require("tap")
 
+// Lib under test
+const extract = require('../../libs/recognize-page-type')
 
 mytest.test("Extract status from single page", {buffered: true}, function (t) {
     // t.fail("********************************** TODO!!!")
@@ -16,14 +18,20 @@ mytest.test("Extract status from single page", {buffered: true}, function (t) {
     }, {
         "scenario": "Check for recognizing successful page",
         "input": {"fixture_folder": "good-complaints-result-page", "fixture_name": "good-complaints-result-page"},
-        "output": {"error": null, "type": "good", "content": ""}
+        "output": {
+            "error": null, "type": "good",
+            "aduan_id": ""
+        }
     }, {
         "scenario": "Check for recognizing empty page",
         "input": {
             "fixture_folder": "good-complaints-result-page",
-            "fixture-name": "good-complaints-empty-result-page"
+            "fixture_name": "good-complaints-empty-result-page"
         },
-        "output": {"error": null, "type": "empty"}
+        "output": {
+            "error": null, "type": "empty",
+            "aduan_id": "17-01000"
+        }
     }, {
         "scenario": "Page does not exist",
         "input": {"fixture_folder": null, "fixture_name": null},
@@ -40,22 +48,39 @@ mytest.test("Extract status from single page", {buffered: true}, function (t) {
          single_test_case.scenario
          )
          */
-        let content = null
         const mycontent = helper_load_fixture(
             single_test_case.input.fixture_folder,
             single_test_case.input.fixture_name
         )
-        mycontent.then(function (myret) {
-            console.error("Content Returned!")
+        mycontent.then((myret) => {
+            // console.error("Content Returned!")
             // console.error("MYRET" + util.inspect(myret))
+            // DEBUG:
+            // console.error("SCENARIO: " + single_test_case.scenario)
+            t.strictSame(
+                extract.execute(myret),
+                single_test_case.output,
+                single_test_case.scenario
+            )
+            t.end()
+
         }).catch((err) => {
+            // DEBUG:
             console.error("ERROR!!!" + util.inspect(err))
+            t.end()
         })
         // t.fail("Content is " + util.inspect(mycontent))
     })
 
-    t.end()
 })
+
+/*
+ mytest.test("MORR TESTSST!!!", {buffered: true}, function (t) {
+ t.fail("********************************** TODO!!!")
+
+ t.end()
+ })
+ */
 
 function helper_load_fixture(fixture_folder, fixture_name) {
     const fs = require('fs')
@@ -63,13 +88,13 @@ function helper_load_fixture(fixture_folder, fixture_name) {
 
     // Inputs
     // DEBUG:
-    console.error(`FOLDER: ${fixture_folder} NAME: ${fixture_name}`)
+    // console.error(`FOLDER: ${fixture_folder} NAME: ${fixture_name}`)
     const readfile = promisify(fs.readFile)
 
     // Skip problem one ..
     if (fixture_folder === null || fixture_name === null) {
         // do nothing
-        return Promise.reject("PRE_REQ FAILED!!!")
+        return Promise.resolve(null)
     }
     return readfile(`./test/fixture/${fixture_folder}/${fixture_name}.html`, {"encoding": "utf-8"})
 }
