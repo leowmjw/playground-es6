@@ -1,0 +1,26 @@
+{
+  "name": "es6-test-tap",
+  "version": "1.0.0",
+  "description": "Test tap",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "subtap": "node_modules/.bin/subtap -f -b --catch --diff test/**/*.test.js || true",
+    "test": "node_modules/.bin/tap test/**/*.test.js || true",
+    "cover": "node_modules/.bin/tap test/**/*.test.js --cov --coverage-report=lcov"
+  },
+  "author": "Michael Leow <leow@sinarproject.org>",
+  "license": "AGPL-3.0",
+  "devDependencies": {
+    "subtap": "^0.7.3",
+    "tap": "^8.0.1",
+    "tap-only": "^0.0.5"
+  },
+  "dependencies": {
+    "cheerio": "^0.22.0",
+    "cheerio-tableparser": "^1.0.1",
+    "es6-promisify": "^5.0.0"
+  }
+}
