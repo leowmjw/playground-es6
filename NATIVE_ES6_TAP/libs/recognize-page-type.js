@@ -41,7 +41,7 @@ function recognize_page_type(page_parsed) {
         const aduan_data = page_parsed('#Table9').parsetable(false, false, true)
         // DEBUG:
         /*
-         console.error("SIZE: " + aduanData.length)
+         console.error("SIZE: " + aduan_data.length)
          aduanData[0].every((element, index, array) => {
          console.error("EL: " + util.inspect(element) + " ID: " + index )
          })
@@ -49,10 +49,13 @@ function recognize_page_type(page_parsed) {
         // Choose the column number; then we can get out the key/value
         // aduanData[0] for the label
         // aduanData[1] for the value
-        aduan_data[1].forEach((element, index) => {
-            console.error('a[' + index + '] = ' + element)
-        })
-        console.error("ADUANID: " + aduan_data[1][0])
+        // DEBUG:
+        /*
+         aduan_data[1].forEach((element, index) => {
+         console.error('a[' + index + '] = ' + element)
+         })
+         */
+        // console.error("ADUANID: " + aduan_data[1][0])
 
         // Tindakan Table
         // id="dsTindakan"
@@ -63,22 +66,38 @@ function recognize_page_type(page_parsed) {
         // Transpose assumes matrix (same size both end); not suitable
         // const transpose = a => a.map((_, c) => a.map(r => r[c]))
         // Last solution by @tatomyr works!!
+        const tindakan_data = page_parsed('#dsTindakan').parsetable(false, false, true).reduce(
+            (p, n) => n.map((item, i) => [...(p[i] || []), n[i]]), []
+        )
+        // DEBUG:
         /*
-         console.error("DATA:" + util.inspect(
-         //    transpose(
-         pageParsed('#dsTindakan').parsetable(false, false, true).reduce(
-         (p, n) => n.map((item, i) => [...(p[i] || []), n[i]]), []
-         )
-         )
-         //)
-         )
+         console.error("TINDAKAN_DATA:" + util.inspect(tindakan_data))
+         console.error("TINDAKAN_LENGTH: " + tindakan_data.length)
          */
+        if (tindakan_data.length == 1) {
+            return {
+                "page_type": "empty",
+                "aduan_id": aduan_data[1][0]
+            }
+        } else {
+            return {
+                "page_type": "good",
+                "aduan_id": aduan_data[1][0]
+            }
+        }
+
 
     } else {
-        return "error"
+        return {
+            "page_type": "error"
+        }
+
+    }
+    // Should not get here .. is bad!
+    return {
+        "page_type": "unknown"
     }
 
-    return "unknown"
 }
 
 function extract_table(loaded_raw_content) {
@@ -93,16 +112,16 @@ function extract_table(loaded_raw_content) {
     // Setup cheerio-tableparser
     tableParser(page_parsed)
     // Extract out page type and other goodies?
-    const page_type = recognize_page_type(page_parsed)
+    const res = recognize_page_type(page_parsed)
 
-    if (page_type == "error") {
+    if (res.page_type == "error") {
         // Assumes Error Page; but it is loaded correctly ..
         return {
             "error": null,
             "type": "error"
         }
 
-    } else if (page_type == "unknown") {
+    } else if (res.page_type == "unknown") {
         return {
             "error": FATAL_UNKNOWN,
             "type": "error"
@@ -113,8 +132,8 @@ function extract_table(loaded_raw_content) {
 
     return {
         "error": null,
-        "type": page_type,
-        "aduan_id": "BOBO"
+        "type": res.page_type,
+        "aduan_id": res.aduan_id
     }
 }
 
