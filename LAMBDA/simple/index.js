@@ -54,7 +54,85 @@ exports.handler = function (event, context, callback) {
         dstKey = prefixKey + size + "." + finalext;
         process(srcBucket, srcKey, dstBucket, dstKey, imageType, size, callback)
     })
+
+    var finaleffects = ["blur", "swirl", "sharper"]
+    finaleffects.map(function (effect) {
+        dstKey = prefixKey + effect + "." + finalext;
+        processEffects(srcBucket, srcKey, dstBucket, dstKey, imageType, effect, callback)
+    })
+
 };
+
+function processEffects(srcBucket, srcKey, dstBucket, dstKey, imageType, effect, callback) {
+
+    // Download the image from S3, transform, and upload to a different S3 bucket.
+    async.waterfall([
+            function download(next) {
+                // Download the image from S3 into a buffer.
+                s3.getObject({
+                        Bucket: srcBucket,
+                        Key: srcKey
+                    },
+                    next);
+            },
+
+            function transform(response, next) {
+
+                if (effect == "blur") {
+                    gm(response.Body).blur(10)
+                        .toBuffer(imageType, function (err, buffer) {
+                            if (err) {
+                                next(err);
+                            } else {
+                                next(null, response.ContentType, buffer);
+                            }
+                        });
+                } else if (effect == "swirl") {
+                    gm(response.Body).swirl(38)
+                        .toBuffer(imageType, function (err, buffer) {
+                            if (err) {
+                                next(err);
+                            } else {
+                                next(null, response.ContentType, buffer);
+                            }
+                        });
+                } else if (effect == "sharper") {
+                    gm(response.Body).sharpen(10)
+                        .toBuffer(imageType, function (err, buffer) {
+                            if (err) {
+                                next(err);
+                            } else {
+                                next(null, response.ContentType, buffer);
+                            }
+                        });
+                }
+
+            },
+            function upload(contentType, data, next) {
+                // Stream the transformed image to a different S3 bucket.
+                s3.putObject({
+                        Bucket: dstBucket,
+                        Key: dstKey,
+                        Body: data,
+                        ContentType: contentType
+                    },
+                    next);
+            }
+
+
+        ], function (err) {
+            if (err) {
+                console.error(' Error: ' + err);
+            } else {
+                console.log('OK!');
+            }
+
+            callback(null, "endProcessEffect");
+
+        }
+    );
+
+}
 
 function process(srcBucket, srcKey, dstBucket, dstKey, imageType, size, callback) {
     // Download the image from S3, transform, and upload to a different S3 bucket.
@@ -100,7 +178,7 @@ function process(srcBucket, srcKey, dstBucket, dstKey, imageType, size, callback
                 console.log('OK!');
             }
 
-            callback(null, "message");
+            callback(null, "endProcess");
 
         }
     );
